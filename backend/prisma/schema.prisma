@@ -1,0 +1,119 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  passwordHash  String
+  fullName      String
+  companyName   String?
+  role          String         @default("BUYER") // BUYER, SELLER, ADMIN
+  kycVerified   Boolean        @default(false)
+  iban          String?        // Банкова сметка за връщане на депозити
+  properties    Property[]
+  bids          Bid[]
+  deposits      Deposit[]
+  kycRequests   KycRequest[]
+  savedAuctions SavedAuction[] // Наблюдавани търгове
+  createdAt     DateTime       @default(now())
+}
+
+model Property {
+  id           String    @id @default(uuid())
+  sellerId     String
+  title        String
+  description  String
+  location     String
+  
+  latitude     Float?    // GPS Ширина
+  longitude    Float?    // GPS Дължина
+  plotArea     Float?    // Площ на парцела (кв.м)
+  builtUpArea  Float?    // Застроена площ - ЗП (кв.м)
+  totalArea    Float?    // Разгъната застроена площ - РЗП (кв.м)
+  startPrice   Decimal?  // Желана стартова цена
+  reservePrice Decimal?  // Минимална цена (Резерв)
+  images       Json?     // Масив от линкове към снимки
+
+  documents    Json?
+  seller       User      @relation(fields: [sellerId], references: [id])
+  auction      Auction?
+  createdAt    DateTime  @default(now())
+}
+
+model Auction {
+  id           String         @id @default(uuid())
+  propertyId   String         @unique
+  startPrice   Decimal
+  reservePrice Decimal
+  currentPrice Decimal
+  startTime    DateTime
+  endTime      DateTime
+  status       String         @default("PENDING") // PENDING, ACTIVE, ENDED, FAILED
+  property     Property       @relation(fields: [propertyId], references: [id])
+  bids         Bid[]
+  deposits     Deposit[]
+  savedBy      SavedAuction[] // Обратна релация за запазените търгове
+}
+
+model Deposit {
+  id               String   @id @default(uuid())
+  userId           String
+  auctionId        String
+  amount           Decimal
+  status           String   @default("LOCKED") // LOCKED, RELEASED, CAPTURED
+  paymentReference String
+  user             User     @relation(fields: [userId], references: [id])
+  auction          Auction  @relation(fields: [auctionId], references: [id])
+
+  // ГАРАНЦИЯ: 1 потребител = 1 депозит за 1 търг
+  @@unique([userId, auctionId]) 
+}
+
+model Bid {
+  id        String   @id @default(uuid())
+  auctionId String
+  userId    String
+  amount    Decimal
+  createdAt DateTime @default(now())
+  auction   Auction  @relation(fields: [auctionId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+// МОДЕЛ: Заявки за верификация (KYC)
+model KycRequest {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  
+  documentType    String   // напр. ID_CARD, PASSPORT, DRIVERS_LICENSE
+  documentUrls    Json     // ПРОМЯНА: Вече е Json (Масив), за да държи лице и гръб
+  
+  status          String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  rejectionReason String?  // Причина за отхвърляне (ако има)
+  
+  externalId      String?  @unique 
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// МОДЕЛ: Любими / Наблюдавани търгове
+model SavedAuction {
+  id        String   @id @default(uuid())
+  userId    String
+  auctionId String
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+  auction   Auction  @relation(fields: [auctionId], references: [id])
+
+  // Гарантираме, че 1 потребител може да запази 1 търг само веднъж
+  @@unique([userId, auctionId])
+}
