@@ -23,8 +23,8 @@ export default function Navbar() {
           
           {/* ЛОГО */}
           <div className="flex-shrink-0 flex items-center">
-            <Link href="/" className="text-2xl font-extrabold tracking-tight text-gray-900" onClick={closeMenu}>
-              turg<span className="text-blue-600">.bg</span>
+            <Link href="/" onClick={closeMenu}>
+              <img src="/logo.svg" alt="Turg.bg" className="h-10 w-auto" />
             </Link>
           </div>
           
