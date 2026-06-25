@@ -52,8 +52,8 @@ export default function AuthPage() {
       localStorage.setItem('turg_token', data.access_token);
       localStorage.setItem('turg_user', JSON.stringify(data.user));
 
-      // Пренасочваме го към Заглавната страница
-      router.push('/');
+      // Пренасочваме го към Заглавната страница на профила
+      router.push('/profile');
       
     } catch (err: any) {
       setError(err.message);

@@ -25,7 +25,7 @@ export default function LoginPage() {
       if (res.ok) {
         const data = await res.json();
         localStorage.setItem('turg_token', data.access_token);
-        router.push('/profile/properties');
+        router.push('/profile');
       } else {
         setError('Невалиден имейл или парола.');
       }
