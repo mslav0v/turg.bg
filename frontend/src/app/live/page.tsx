@@ -13,7 +13,7 @@ export default function LiveAuctionRoom() {
 
   useEffect(() => {
     // 1. Взимаме реалните данни от бекенда (REST API)
-    fetch('http://localhost:4000/api/active-auction')
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/active-auction`)
       .then((res) => {
         // Подсигуряваме се, че отговорът е валиден
         if (!res.ok) {
@@ -35,11 +35,11 @@ export default function LiveAuctionRoom() {
         setLoading(false);
 
         // 2. Свързваме се с WebSocket сървъра на бекенда
-        const newSocket = io('http://localhost:4000');
+        const newSocket = io(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000');
         setSocket(newSocket);
 
         newSocket.on('connect', () => {
-          console.log('🔗 Връзката със сървъра е успешна!');
+          console.log('Връзката със сървъра е успешна!');
           // Влизаме в дигиталната стая за този конкретен търг
           newSocket.emit('joinAuction', data.auction.id);
         });
@@ -104,16 +104,16 @@ export default function LiveAuctionRoom() {
         {/* Информация за имота */}
         <div className="md:w-1/2 p-8 bg-gray-50 border-r border-gray-200">
           <span className="bg-red-100 text-red-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-4 inline-block animate-pulse">
-            🔴 Търг на живо
+            Търг на живо
           </span>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">{auctionData?.property?.title}</h1>
-          <p className="text-gray-500 mb-6">📍 {auctionData?.property?.location}</p>
+          <p className="text-gray-500 mb-6">{auctionData?.property?.location}</p>
           <p className="text-gray-700 leading-relaxed mb-8">{auctionData?.property?.description}</p>
           
           <div className="bg-white p-4 rounded-lg border border-gray-200">
             <p className="text-sm text-gray-500 font-semibold mb-1">Вашият профил:</p>
             <p className="text-gray-900 font-bold">{buyerData?.fullName}</p>
-            <p className="text-xs text-green-600 font-bold mt-1">✓ Депозитът е потвърден</p>
+            <p className="text-xs text-green-600 font-bold mt-1">Депозитът е потвърден</p>
           </div>
         </div>
 
@@ -142,7 +142,7 @@ export default function LiveAuctionRoom() {
               ) : (
                 bidHistory.map((log, idx) => (
                   <p key={idx} className="text-sm text-gray-600 bg-gray-50 p-2 rounded border border-gray-100 slide-in">
-                    ⏱️ {log}
+                    {log}
                   </p>
                 ))
               )}

@@ -27,7 +27,7 @@ export default function AdminUsersPage() {
   const fetchUsers = async () => {
     const token = localStorage.getItem('turg_token');
     try {
-      const res = await fetch('http://localhost:4000/api/admin/users', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/users`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!res.ok) throw new Error('Грешка при зареждане.');
@@ -70,7 +70,7 @@ export default function AdminUsersPage() {
     const token = localStorage.getItem('turg_token');
 
     try {
-      const res = await fetch(`http://localhost:4000/api/admin/users/${editingUser?.id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/users/${editingUser?.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -97,7 +97,7 @@ export default function AdminUsersPage() {
     const token = localStorage.getItem('turg_token');
 
     try {
-      const res = await fetch(`http://localhost:4000/api/admin/users/${editingUser?.id}/reset-password`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/users/${editingUser?.id}/reset-password`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });

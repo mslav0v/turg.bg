@@ -19,7 +19,7 @@ interface Auction {
 async function getAuctions(): Promise<Auction[]> {
   try {
     // Използваме cache: 'no-store', за да виждаме винаги най-актуалните цени
-    const res = await fetch('http://localhost:4000/api/auctions', { cache: 'no-store' });
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auctions`, { cache: 'no-store' });
     if (!res.ok) {
       throw new Error('Грешка при изтегляне на данните');
     }
@@ -57,7 +57,7 @@ export default async function AuctionsPage() {
               {/* Снимка (Placeholder за сега) */}
               <div className="h-56 bg-gray-200 relative overflow-hidden">
                 <div className="absolute inset-0 flex items-center justify-center text-gray-400">
-                  📷 Липсва снимка
+                  Липсва снимка
                 </div>
                 <div className="absolute top-4 left-4 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider animate-pulse shadow-md">
                   Активен Търг
@@ -70,7 +70,7 @@ export default async function AuctionsPage() {
                   {auction.property.title}
                 </h3>
                 <p className="text-sm text-gray-500 mb-4 flex items-center gap-1">
-                  📍 {auction.property.location}
+                  {auction.property.location}
                 </p>
                 
                 <div className="mt-auto pt-4 border-t border-gray-100 flex justify-between items-center">

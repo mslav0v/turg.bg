@@ -20,7 +20,7 @@ export default function ProfileSettingsPage() {
       if (!token) return;
       
       try {
-        const res = await fetch('http://localhost:4000/api/users/profile', {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/profile`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.ok) {
@@ -54,7 +54,7 @@ export default function ProfileSettingsPage() {
     const token = localStorage.getItem('turg_token');
 
     try {
-      const res = await fetch('http://localhost:4000/api/users/profile', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/profile`, {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',

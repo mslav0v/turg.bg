@@ -13,7 +13,12 @@ import { PrismaService } from '../prisma.service';
 
 @WebSocketGateway({
   cors: {
-    origin: 'http://localhost:3000',
+    origin: [
+      'http://localhost:3000',
+      'https://turg.bg',
+      'https://www.turg.bg',
+      'https://turg-bg.vercel.app'
+    ],
     credentials: true,
   },
 })
@@ -137,7 +142,7 @@ export class AuctionGateway implements OnGatewayConnection, OnGatewayDisconnect 
       this.logger.log(`✅ Успешен бит: €${payload.amount} от ${buyer.email}`);
       return { status: 'success', message: 'Успешно наддаване!' };
 
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(`Системна грешка при наддаване: ${error.message}`);
       return { status: 'error', message: 'Възникна системна грешка.' };
     }

@@ -24,7 +24,7 @@ export default function AdminKycPage() {
     setLoading(true);
     const token = localStorage.getItem('turg_token');
     try {
-      const res = await fetch('http://localhost:4000/api/admin/kyc', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/kyc`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
@@ -43,7 +43,7 @@ export default function AdminKycPage() {
   const handleApprove = async (id: string) => {
     if (!confirm('Сигурни ли сте, че одобрявате тези документи?')) return;
     const token = localStorage.getItem('turg_token');
-    await fetch(`http://localhost:4000/api/admin/kyc/${id}/approve`, {
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/kyc/${id}/approve`, {
       method: 'PUT',
       headers: { 'Authorization': `Bearer ${token}` }
     });
@@ -54,7 +54,7 @@ export default function AdminKycPage() {
   const handleReject = async (id: string) => {
     if (!rejectReason) return alert('Моля, изберете причина за отхвърляне.');
     const token = localStorage.getItem('turg_token');
-    await fetch(`http://localhost:4000/api/admin/kyc/${id}/reject`, {
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/kyc/${id}/reject`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
       body: JSON.stringify({ reason: rejectReason })
@@ -141,7 +141,7 @@ export default function AdminKycPage() {
               <div className="flex-1 flex items-center justify-center p-8">
                 {/* Симулираме визуализация на документа, тъй като в момента нямаме качен реален файл */}
                 <div className="bg-gray-800 text-gray-400 border-2 border-dashed border-gray-600 rounded-xl w-full h-full flex items-center justify-center flex-col">
-                  <span className="text-4xl mb-2">📄</span>
+                  <span className="text-4xl mb-2"></span>
                   <p>Симулация на качен документ</p>
                   <p className="text-xs mt-2 text-blue-400 break-all px-8 text-center">{inspectingReq.documentUrl}</p>
                 </div>
@@ -189,7 +189,7 @@ export default function AdminKycPage() {
                 <div className="space-y-4 bg-gray-50 p-4 rounded-xl border border-gray-200">
                   <h3 className="text-sm font-bold text-gray-700 uppercase">Вземи решение</h3>
                   <button onClick={() => handleApprove(inspectingReq.id)} className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg shadow transition">
-                    ✅ Одобри документа
+                    Одобри документа
                   </button>
                   
                   <div className="pt-4 border-t border-gray-300">
@@ -205,7 +205,7 @@ export default function AdminKycPage() {
                       <option value="Съмнение за фалшификация (Измама)">Съмнение за фалшификация (Измама)</option>
                     </select>
                     <button onClick={() => handleReject(inspectingReq.id)} className="w-full bg-white border-2 border-red-500 text-red-600 hover:bg-red-50 font-bold py-2 rounded-lg transition">
-                      ❌ Отхвърли заявката
+                      Отхвърли заявката
                     </button>
                   </div>
                 </div>

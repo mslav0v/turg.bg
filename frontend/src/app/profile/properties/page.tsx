@@ -38,7 +38,7 @@ export default function MyPropertiesPage() {
     setLoading(true);
     const token = localStorage.getItem('turg_token');
     try {
-      const res = await fetch('http://localhost:4000/api/properties', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/properties`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -104,7 +104,7 @@ export default function MyPropertiesPage() {
     }
 
     try {
-      const res = await fetch('http://localhost:4000/api/properties', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/properties`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         body: data

@@ -41,7 +41,7 @@ export default function SellerPortal() {
     const token = localStorage.getItem('turg_token');
 
     try {
-      const res = await fetch('http://localhost:4000/api/auctions', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auctions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -96,10 +96,10 @@ export default function SellerPortal() {
 
         {success && (
           <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-6 rounded">
-            <p className="text-sm text-green-700 font-bold mb-1">🎉 Успех!</p>
+            <p className="text-sm text-green-700 font-bold mb-1">Успех!</p>
             <p className="text-sm text-green-600">Вашият имот е публикуван успешно.</p>
             <Link href="/auctions" className="text-sm text-blue-600 hover:underline mt-2 inline-block">
-              Към списъка с продажби &rarr;
+              Към списъка с продажби
             </Link>
           </div>
         )}

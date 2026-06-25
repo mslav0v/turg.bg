@@ -20,7 +20,7 @@ export default function AdminDashboard() {
       if (!token) return; // Ако няма токен, layout.tsx вече се е погрижил да ни изгони
 
       try {
-        const res = await fetch('http://localhost:4000/api/admin/dashboard-stats', {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/dashboard-stats`, {
           headers: {
             'Authorization': `Bearer ${token}` // Изпращаме VIP пропуска
           }
@@ -63,7 +63,7 @@ export default function AdminDashboard() {
     <div>
       <h1 className="text-3xl font-bold text-gray-800 mb-8">Табло за управление</h1>
       
-      {/* 📊 Статистики (Widget Cards) */}
+      {/* Статистики (Widget Cards) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         
         {/* Клиенти */}
@@ -92,7 +92,7 @@ export default function AdminDashboard() {
       {/* Информационен панел */}
       <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
         <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-          👋 Добре дошли в Системата
+          Добре дошли в Системата
         </h2>
         <p className="text-gray-600 leading-relaxed mb-4">
           Това е вашият централен административен хъб. От лявото навигационно меню имате пълен достъп до:

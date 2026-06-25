@@ -16,7 +16,7 @@ export default function KycVerificationPage() {
     setLoading(true);
     const token = localStorage.getItem('turg_token');
     try {
-      const res = await fetch('http://localhost:4000/api/kyc/my-status', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/kyc/my-status`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
@@ -82,7 +82,7 @@ export default function KycVerificationPage() {
     });
 
     try {
-      const res = await fetch('http://localhost:4000/api/kyc/upload', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/kyc/upload`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         body: formData
