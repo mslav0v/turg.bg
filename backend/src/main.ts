@@ -4,9 +4,15 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // 1. Активираме CORS (позволява на turg.bg фронтенда да чете данни свободно)
+  // 1. Активираме CORS (позволява на turg.bg и локалния фронтенд да четат данни свободно)
   app.enableCors({
-    origin: 'http://localhost:3000',
+    origin: [
+      'http://localhost:3000',
+      'https://turg.bg',
+      'https://www.turg.bg',
+      'https://turg-bg.vercel.app' // Добавяме и временния Vercel адрес за застраховка
+    ],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
 
@@ -14,6 +20,6 @@ async function bootstrap() {
   const port = process.env.PORT || 4000;
   
   await app.listen(port);
-  console.log(`🚀 Бекендът е стартиран успешно и слуша на: http://localhost:${port}`);
+  console.log(`🚀 Бекендът е стартиран успешно и слуша на порт: ${port}`);
 }
 bootstrap();
