@@ -24,7 +24,7 @@ export default function Navbar() {
           {/* ЛОГО */}
           <div className="flex-shrink-0 flex items-center">
             <Link href="/" onClick={closeMenu}>
-              <img src="/logo.svg" alt="Turg.bg" className="h-10 w-auto" />
+              <img src="/logo.svg" alt="Turg.bg" className="h-16 w-auto" />
             </Link>
           </div>
           
