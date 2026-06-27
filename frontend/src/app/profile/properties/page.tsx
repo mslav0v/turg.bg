@@ -17,14 +17,12 @@ export default function MyPropertiesPage() {
   const [saving, setSaving] = useState(false);
   
   const [formData, setFormData] = useState({
-    assetType: 'PROPERTY',
+    assetType: 'PROPERTY', // Нова стойност по подразбиране за типа актив
     title: '', description: '', location: '',
     plotArea: '', builtUpArea: '', totalArea: '',
-    startPrice: '', reservePrice: ''
+    startPrice: '', reservePrice: '',
+    vin: '', operatingHours: '' // Добавени допълнителни полета за новите категории
   });
-
-  // Нова част за динамични характеристики
-  const [specifications, setSpecifications] = useState<any>({});
   
   const [coordinates, setCoordinates] = useState<{lat: number, lng: number} | null>(null);
   const [files, setFiles] = useState<FileList | null>(null);
@@ -58,13 +56,6 @@ export default function MyPropertiesPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    if (e.target.name === 'assetType') {
-      setSpecifications({});
-    }
-  };
-
-  const handleSpecChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSpecifications({ ...specifications, [e.target.name]: e.target.value });
   };
 
   const handleMapClick = useCallback((e: google.maps.MapMouseEvent) => {
@@ -101,12 +92,28 @@ export default function MyPropertiesPage() {
     const token = localStorage.getItem('turg_token');
     
     const data = new FormData();
+    
+    // Динамично пакетиране на техническите характеристики според избрания тип актив
+    const specs: any = {};
+    if (formData.assetType === 'PROPERTY') {
+      if (formData.plotArea) specs.plotArea = Number(formData.plotArea);
+      if (formData.builtUpArea) specs.builtUpArea = Number(formData.builtUpArea);
+      if (formData.totalArea) specs.totalArea = Number(formData.totalArea);
+    } else if (formData.assetType === 'VEHICLE') {
+      if (formData.vin) specs.vin = formData.vin;
+    } else if (formData.assetType === 'CONSTRUCTION_MACHINERY') {
+      if (formData.operatingHours) specs.operatingHours = Number(formData.operatingHours);
+    }
+
+    // Прикачваме основните данни, филтрирайки специфичните от FormData
     Object.entries(formData).forEach(([key, value]) => {
-      if (value) data.append(key, value as string);
+      if (value && !['plotArea', 'builtUpArea', 'totalArea', 'vin', 'operatingHours'].includes(key)) {
+        data.append(key, value as string);
+      }
     });
 
-    // Добавяме JSON спецификациите като стринг, за да се обработи правилно от бекенда
-    data.append('specifications', JSON.stringify(specifications));
+    // Записваме структурирания JSON като текст за бекенда
+    data.append('specifications', JSON.stringify(specs));
     
     if (coordinates) {
       data.append('latitude', coordinates.lat.toString());
@@ -126,8 +133,11 @@ export default function MyPropertiesPage() {
 
       if (res.ok) {
         setIsCreating(false);
-        setFormData({ assetType: 'PROPERTY', title: '', description: '', location: '', startPrice: '', reservePrice: '' });
-        setSpecifications({});
+        setFormData({ 
+          assetType: 'PROPERTY', title: '', description: '', location: '', 
+          plotArea: '', builtUpArea: '', totalArea: '', startPrice: '', reservePrice: '',
+          vin: '', operatingHours: ''
+        });
         setCoordinates(null);
         setFiles(null);
         fetchProperties();
@@ -161,14 +171,14 @@ export default function MyPropertiesPage() {
           
           <form onSubmit={handleSubmit} className="p-8 space-y-10">
             
-            {/* НОВ СЕЛЕКТОР ЗА ТИП АКТИВ */}
-            <div className="space-y-6">
-              <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200 pb-2">0. Тип на актива</h3>
-              <select name="assetType" value={formData.assetType} onChange={handleChange} className="w-full border border-gray-300 rounded-lg p-3">
-                 <option value="PROPERTY">Недвижим имот</option>
-                 <option value="VEHICLE">Автомобил / МПС</option>
-                 <option value="CONSTRUCTION_MACHINERY">Строителна техника</option>
-                 <option value="OTHER">Други</option>
+            {/* СЕЛЕКТОР ЗА ТИП АКТИВ */}
+            <div className="space-y-6 bg-gray-50 p-4 rounded-xl border border-gray-200">
+              <label className="block text-sm font-bold text-gray-700">Изберете тип на актива</label>
+              <select name="assetType" value={formData.assetType} onChange={handleChange} className="w-full border border-gray-300 rounded-lg p-3 bg-white outline-none focus:ring-1 focus:ring-gray-900">
+                <option value="PROPERTY">Недвижим имот</option>
+                <option value="VEHICLE">Лек / Товарен автомобил (МПС)</option>
+                <option value="CONSTRUCTION_MACHINERY">Строителна техника</option>
+                <option value="OTHER">Други движими вещи</option>
               </select>
             </div>
 
@@ -187,23 +197,47 @@ export default function MyPropertiesPage() {
               </div>
             </div>
 
-            {/* БЛОК 2: ДИНАМИЧНИ ТЕХНИЧЕСКИ ХАРАКТЕРИСТИКИ */}
+            {/* БЛОК 2: ПЛОЩИ И ХАРАКТЕРИСТИКИ */}
             <div className="space-y-6">
-              <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200 pb-2">2. Технически характеристики</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                 {formData.assetType === 'PROPERTY' && (
-                  <>
-                    <input type="number" name="totalArea" placeholder="РЗП (кв.м.)" onChange={handleSpecChange} className="border p-3 rounded" />
-                    <input type="text" name="constructionType" placeholder="Тип строителство" onChange={handleSpecChange} className="border p-3 rounded" />
-                  </>
-                 )}
-                 {formData.assetType === 'VEHICLE' && (
-                    <input type="text" name="vin" placeholder="VIN номер" onChange={handleSpecChange} className="border p-3 rounded" />
-                 )}
-                 {formData.assetType === 'CONSTRUCTION_MACHINERY' && (
-                    <input type="number" name="operatingHours" placeholder="Моточасове" onChange={handleSpecChange} className="border p-3 rounded" />
-                 )}
-              </div>
+              {formData.assetType === 'PROPERTY' ? (
+                <>
+                  <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200 pb-2">2. Квадратури (кв.м.)</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">Площ на парцела</label>
+                      <input type="number" name="plotArea" value={formData.plotArea} onChange={handleChange} className="w-full border border-gray-300 rounded-lg p-3 focus:ring-1 focus:ring-gray-900 outline-none transition" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">Застроена площ (ЗП)</label>
+                      <input type="number" name="builtUpArea" value={formData.builtUpArea} onChange={handleChange} className="w-full border border-gray-300 rounded-lg p-3 focus:ring-1 focus:ring-gray-900 outline-none transition" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">Разгъната застр. площ (РЗП)</label>
+                      <input type="number" name="totalArea" value={formData.totalArea} onChange={handleChange} className="w-full border border-gray-300 rounded-lg p-3 focus:ring-1 focus:ring-gray-900 outline-none transition" />
+                    </div>
+                  </div>
+                </>
+              ) : formData.assetType === 'VEHICLE' ? (
+                <>
+                  <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200 pb-2">2. Спецификации на превозното средство</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">VIN номер (Рама)</label>
+                      <input type="text" name="vin" value={formData.vin} onChange={handleChange} placeholder="17-символен код" className="w-full border border-gray-300 rounded-lg p-3 focus:ring-1 focus:ring-gray-900 outline-none transition uppercase" />
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200 pb-2">2. Технически параметри</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">Работни моточасове</label>
+                      <input type="number" name="operatingHours" value={formData.operatingHours} onChange={handleChange} className="w-full border border-gray-300 rounded-lg p-3 focus:ring-1 focus:ring-gray-900 outline-none transition" />
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* БЛОК 3: ФИНАНСОВИ ПАРАМЕТРИ */}
@@ -227,26 +261,42 @@ export default function MyPropertiesPage() {
               <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200 pb-2">4. Локация</h3>
               
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Текстови адрес</label>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Текстови адрес (Попълва се автоматично при избор от картата)</label>
                 <input type="text" name="location" value={formData.location} onChange={handleChange} required placeholder="напр. ул. Никола Гюзелев 43..." className="w-full border border-gray-300 rounded-lg p-3 focus:ring-1 focus:ring-gray-900 outline-none transition" />
               </div>
 
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">Намерете на картата (или кликнете за маркер)</label>
                 <div className="border border-gray-300 rounded-lg overflow-hidden bg-gray-100 flex flex-col">
-                   {isLoaded ? (
-                     <>
+                  
+                  {!process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ? (
+                    <div className="h-[400px] flex flex-col items-center justify-center text-gray-500 p-6 text-center">
+                      <span className="font-bold text-gray-700 mb-2">Интерактивната карта е деактивирана</span>
+                      <span className="text-sm">Системен администратор трябва да добави Google Maps API ключ в конфигурацията.</span>
+                    </div>
+                  ) : isLoaded ? (
+                    <>
+                      {/* НОВ ИЗГЛЕД НА ТЪРСАЧКАТА - СОЛИДЕН БЛОК НАД КАРТАТА */}
+                      <div className="bg-gray-50 p-5 border-b border-gray-300">
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Бързо търсене на локация</label>
                         <StandaloneSearchBox onLoad={onSearchBoxLoad} onPlacesChanged={onPlacesChanged}>
-                          <input type="text" placeholder="Търсене на локация..." className="w-full p-3 outline-none" />
+                          <input 
+                            type="text" 
+                            placeholder="Въведете град, квартал или точен адрес..." 
+                            className="w-full border-2 border-gray-300 rounded-lg p-3 text-gray-900 font-bold focus:border-gray-900 focus:ring-0 outline-none bg-white shadow-sm transition"
+                          />
                         </StandaloneSearchBox>
-                        <GoogleMap mapContainerStyle={mapContainerStyle} center={coordinates || defaultCenter} zoom={6} onClick={handleMapClick}>
-                           {coordinates && <Marker position={coordinates} />}
-                        </GoogleMap>
-                     </>
-                   ) : (
-                      <div className="h-[450px] flex items-center justify-center text-gray-500 font-medium">Зареждане на картата...</div>
-                   )}
+                      </div>
+
+                      <GoogleMap mapContainerStyle={mapContainerStyle} center={coordinates || defaultCenter} zoom={6} onClick={handleMapClick}>
+                        {coordinates && <Marker position={coordinates} />}
+                      </GoogleMap>
+                    </>
+                  ) : (
+                    <div className="h-[450px] flex items-center justify-center text-gray-500 font-medium">Зареждане на картата...</div>
+                  )}
                 </div>
+                {coordinates && <p className="text-xs text-gray-900 mt-3 font-bold">Координатите са записани успешно.</p>}
               </div>
             </div>
 
@@ -254,13 +304,13 @@ export default function MyPropertiesPage() {
             <div className="space-y-6">
               <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider border-b border-gray-200 pb-2">5. Галерия</h3>
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Снимки на актива (до 10 файла)</label>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Снимки на имота (до 10 файла)</label>
                 <input 
                   type="file" 
                   multiple 
                   accept="image/*"
                   onChange={(e) => setFiles(e.target.files)}
-                  className="block w-full text-sm text-gray-500 border border-gray-300 rounded-lg cursor-pointer"
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-3 file:px-6 file:border-0 file:text-sm file:font-bold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer border border-gray-300 rounded-lg"
                 />
               </div>
             </div>
@@ -270,35 +320,45 @@ export default function MyPropertiesPage() {
                 {saving ? 'Запазване и качване...' : 'Запази обявата'}
               </button>
               <button type="button" onClick={() => setIsCreating(false)} className="bg-white text-gray-700 border border-gray-300 font-bold py-3 px-8 rounded-lg hover:bg-gray-50 transition">
-                Отказ
+                Oтказ
               </button>
             </div>
           </form>
         </div>
       ) : (
-        /* СПИСЪК С АКТИВИ */
+        /* СПИСЪК С ИМОТИ */
         <div>
-           {properties.length === 0 ? (
+          {properties.length === 0 ? (
             <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
-              <p className="text-gray-500 font-medium mb-4">Нямате добавени активи до момента.</p>
+              <p className="text-gray-500 font-medium mb-4">Нямате добавени обекти до момента.</p>
             </div>
-           ) : (
-             <div className="grid grid-cols-1 gap-6">
-               {properties.map((asset) => (
-                 <div key={asset.id} className="bg-white border border-gray-200 rounded-lg p-6 flex flex-col md:flex-row justify-between gap-6">
-                    <div className="flex-1">
-                      <h3 className="text-xl font-bold text-gray-900 mb-1">{asset.title}</h3>
-                      <p className="text-sm font-medium text-gray-500 mb-3">{asset.location}</p>
-                      <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded uppercase tracking-wider font-bold">{asset.assetType}</span>
+          ) : (
+            <div className="grid grid-cols-1 gap-6">
+              {properties.map((property) => (
+                <div key={property.id} className="bg-white border border-gray-200 rounded-lg p-6 flex flex-col md:flex-row justify-between gap-6 hover:border-gray-300 transition">
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-900 mb-1">{property.title}</h3>
+                    <p className="text-sm font-medium text-gray-500 mb-3">{property.location}</p>
+                    <div className="flex flex-wrap gap-4 text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">
+                      <span className="bg-gray-100 px-2 py-1 rounded text-gray-700">{property.assetType || 'PROPERTY'}</span>
+                      <span>Старт: €{property.startPrice || '---'}</span>
+                      <span>Резерв: €{property.reservePrice || '---'}</span>
                     </div>
-                    <div className="flex-shrink-0 text-right">
-                       <span className="block font-bold text-gray-900">€{asset.startPrice}</span>
-                       {asset.auction ? <span className="text-blue-600 font-bold text-sm">Активен търг</span> : <span className="text-gray-400 text-sm">Подготовка</span>}
-                    </div>
-                 </div>
-               ))}
-             </div>
-           )}
+                    <p className="text-sm text-gray-600 line-clamp-2">{property.description}</p>
+                  </div>
+                  
+                  <div className="flex-shrink-0 flex flex-col items-end gap-2 border-l border-gray-100 pl-6">
+                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Статус</span>
+                    {property.auction ? (
+                      <span className="bg-blue-50 text-blue-700 border border-blue-200 px-4 py-1.5 rounded-sm text-sm font-bold">Активен търг</span>
+                    ) : (
+                      <span className="bg-gray-100 text-gray-700 border border-gray-200 px-4 py-1.5 rounded-sm text-sm font-bold">Подготовка</span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

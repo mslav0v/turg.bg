@@ -18,7 +18,7 @@ export class PropertiesController {
 
     const supabaseUrl = process.env.SUPABASE_URL;
     const supabaseKey = process.env.SUPABASE_KEY;
-    if (!supabaseUrl || !supabaseKey) throw new Error('Липсва Supabase конфигурация.');
+    if (!supabaseUrl || !supabaseKey) throw new Error('Липасва Supabase конфигурация.');
     
     const supabase = createClient(supabaseUrl, supabaseKey);
     
@@ -40,27 +40,26 @@ export class PropertiesController {
     }
 
     // Запис в базата данни
-    return this.prisma.property.create({
+    return this.prisma.asset.create({
       data: {
         sellerId: req.user.id,
+        assetType: body.assetType || 'PROPERTY',
         title: body.title,
         description: body.description,
         location: body.location,
         latitude: body.latitude ? parseFloat(body.latitude) : null,
         longitude: body.longitude ? parseFloat(body.longitude) : null,
-        plotArea: body.plotArea ? parseFloat(body.plotArea) : null,
-        builtUpArea: body.builtUpArea ? parseFloat(body.builtUpArea) : null,
-        totalArea: body.totalArea ? parseFloat(body.totalArea) : null,
         startPrice: body.startPrice ? parseFloat(body.startPrice) : null,
         reservePrice: body.reservePrice ? parseFloat(body.reservePrice) : null,
         images: uploadedImages,
+        specifications: body.specifications ? (typeof body.specifications === 'string' ? JSON.parse(body.specifications) : body.specifications) : {},
       }
     });
   }
 
   @Get()
   async getMyProperties(@Req() req: any) {
-    return this.prisma.property.findMany({
+    return this.prisma.asset.findMany({
       where: { sellerId: req.user.id },
       orderBy: { createdAt: 'desc' },
       include: { auction: true }
