@@ -6,7 +6,7 @@ export default function GuaranteesPage() {
       
       {/* КОНЦЕПТУАЛНО ЗАГЛАВИЕ И ВЪВЕДЕНИЕ */}
       <div className="text-center mb-24 border-b border-gray-200 pb-12">
-        <h1 className="text-5xl font-black text-gray-900 tracking-tight mb-6">
+        <h1 className="text-3xl font-black text-gray-900 tracking-tight mb-6">
           Регламент на работа и институционални гаранции
         </h1>
         <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
