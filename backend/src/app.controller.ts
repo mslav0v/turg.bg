@@ -10,7 +10,7 @@ export class AppController {
     // Взимаме първия активен търг заедно с данните за имота
     const auction = await this.prisma.auction.findFirst({
       where: { status: 'ACTIVE' },
-      include: { property: true },
+      include: { asset: true },
     });
     // Взимаме нашия тестов купувач
     const buyer = await this.prisma.user.findUnique({
