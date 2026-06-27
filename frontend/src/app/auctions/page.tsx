@@ -3,12 +3,12 @@ import Link from 'next/link';
 // Дефинираме типа на данните, които очакваме от бекенда
 interface Auction {
   id: string;
-  propertyId: string;
+  assetId: string;
   startPrice: string;
   currentPrice: string;
   endTime: string;
   status: string;
-  property: {
+  asset: {
     title: string;
     location: string;
     description: string;
@@ -67,10 +67,10 @@ export default async function AuctionsPage() {
               {/* Информация за имота */}
               <div className="p-6 flex flex-col flex-grow">
                 <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors line-clamp-2">
-                  {auction.property.title}
+                  {auction.asset.title}
                 </h3>
                 <p className="text-sm text-gray-500 mb-4 flex items-center gap-1">
-                  {auction.property.location}
+                  {auction.asset.location}
                 </p>
                 
                 <div className="mt-auto pt-4 border-t border-gray-100 flex justify-between items-center">
