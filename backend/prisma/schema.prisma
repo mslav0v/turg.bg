@@ -17,7 +17,7 @@ model User {
   role          String         @default("BUYER") // BUYER, SELLER, ADMIN
   kycVerified   Boolean        @default(false)
   iban          String?        // Банкова сметка за връщане на депозити
-  properties    Property[]
+  assets        Asset[]
   bids          Bid[]
   deposits      Deposit[]
   kycRequests   KycRequest[]
@@ -25,38 +25,53 @@ model User {
   createdAt     DateTime       @default(now())
 }
 
-model Property {
+enum AssetType {
+  PROPERTY                // Недвижими имоти
+  VEHICLE                 // Леки и товарни автомобили
+  CONSTRUCTION_MACHINERY  // Строителна техника (мини багери, челни товарачи, дъмпери)
+  AGRI_MACHINERY          // Селскостопанска техника и инвентар
+  INDUSTRIAL_EQUIPMENT    // Индустриално оборудване (CNC машини, производствени линии)
+  TOOLS_WELDING           // Машини, инструменти и заваръчна техника
+  BATTERIES_ENERGY        // Индустриални батерии и енергийни системи
+  IT_COMPUTERS            // Битова и компютърна техника
+  VALUABLES_ART           // Ценности, изкуство и бижута
+  OTHER                   // Други движими вещи
+}
+
+model Asset {
   id           String    @id @default(uuid())
   sellerId     String
+  assetType    AssetType @default(PROPERTY)
   title        String
   description  String
   location     String
   
   latitude     Float?    // GPS Ширина
   longitude    Float?    // GPS Дължина
-  plotArea     Float?    // Площ на парцела (кв.м)
-  builtUpArea  Float?    // Застроена площ - ЗП (кв.м)
-  totalArea    Float?    // Разгъната застроена площ - РЗП (кв.м)
   startPrice   Decimal?  // Желана стартова цена
   reservePrice Decimal?  // Минимална цена (Резерв)
   images       Json?     // Масив от линкове към снимки
 
   documents    Json?
+  
+  // Специфични технически характеристики за всеки вид актив (пази се като JSON обект)
+  specifications Json?   @default("{}")
+
   seller       User      @relation(fields: [sellerId], references: [id])
   auction      Auction?
   createdAt    DateTime  @default(now())
 }
 
 model Auction {
-  id           String         @id @default(uuid())
-  propertyId   String         @unique
+  id           String        @id @default(uuid())
+  assetId      String        @unique
   startPrice   Decimal
   reservePrice Decimal
   currentPrice Decimal
   startTime    DateTime
   endTime      DateTime
-  status       String         @default("PENDING") // PENDING, ACTIVE, ENDED, FAILED
-  property     Property       @relation(fields: [propertyId], references: [id])
+  status       String        @default("PENDING") // PENDING, ACTIVE, ENDED, FAILED
+  asset        Asset         @relation(fields: [assetId], references: [id])
   bids         Bid[]
   deposits     Deposit[]
   savedBy      SavedAuction[] // Обратна релация за запазените търгове

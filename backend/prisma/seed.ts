@@ -33,17 +33,22 @@ async function main() {
 
   console.log('👤 Потребителите са създадени.');
 
-  // 3. Създаваме Имот
-  const property = await prisma.property.create({
+  // 3. Създаваме Актив
+  const asset = await prisma.asset.create({
     data: {
       title: 'Екологична къща от конопени панели',
       description: 'Иновативна сглобяема къща с висока енергийна ефективност.',
       location: 'обл. Варна, с. Рогачево',
+      assetType: 'PROPERTY',
+      specifications: {
+        totalArea: 120,
+        constructionType: 'Еко строителство',
+      },
       sellerId: seller.id,
     },
   });
 
-  console.log('🏠 Имотът е създаден.');
+  console.log('🏠 Активът е създаден.');
 
   // 4. Създаваме Търг (Започва сега, завършва след 2 дни)
   const now = new Date();
@@ -52,7 +57,7 @@ async function main() {
 
   const auction = await prisma.auction.create({
     data: {
-      propertyId: property.id,
+      assetId: asset.id,
       startPrice: 125000,
       reservePrice: 140000,
       currentPrice: 125000,

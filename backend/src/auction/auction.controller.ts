@@ -13,7 +13,7 @@ export class AuctionController {
     return this.prisma.auction.findMany({
       where: { status: 'ACTIVE' },
       include: {
-        property: true, // Включваме данните за самия имот
+        asset: true, // Включваме данните за самия актив (имот, машина, МПС и др.)
       },
       orderBy: { endTime: 'asc' }, // Най-скоро изтичащите са първи
     });
@@ -32,22 +32,26 @@ export class AuctionController {
       throw new ForbiddenException('Само верифицирани продавачи могат да създават търгове.');
     }
 
-    // Извършваме създаването на имота и търга в една ACID транзакция
+    // Извършваме създаването на актива и търга в една ACID транзакция
     return this.prisma.$transaction(async (prisma) => {
-      // 1. Създаваме имота
-      const property = await prisma.property.create({
+      // 1. Създаваме актива с неговия тип и специфични технически характеристики
+      const asset = await prisma.asset.create({
         data: {
           title: body.title,
           location: body.location,
           description: body.description || 'Няма въведено описание.',
+          assetType: body.assetType, // Напр. PROPERTY, VEHICLE, CONSTRUCTION_MACHINERY
+          latitude: body.latitude ? parseFloat(body.latitude) : null,
+          longitude: body.longitude ? parseFloat(body.longitude) : null,
+          specifications: body.specifications || {}, // Специфичните данни за съответната категория като JSON
           sellerId: user.id, // Взимаме ID-то директно от сигурния токен
         },
       });
 
-      // 2. Създаваме търга към този имот
+      // 2. Създаваме търга към този актив
       const auction = await prisma.auction.create({
         data: {
-          propertyId: property.id,
+          assetId: asset.id,
           startPrice: body.startPrice,
           reservePrice: body.reservePrice,
           currentPrice: body.startPrice, // В началото текущата цена е равна на началната
@@ -57,7 +61,7 @@ export class AuctionController {
         },
       });
 
-      return { property, auction };
+      return { asset, auction };
     });
   }
 }
