@@ -10,6 +10,10 @@ export default function SellerPortal() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
+  // НАДГРАЖДАНЕ: Стейтове за конфиденциален статус и списък с имейли
+  const [isPrivate, setIsPrivate] = useState(false);
+  const [invitedEmailsText, setInvitedEmailsText] = useState('');
+
   // Проверка дали потребителят е логнат
   useEffect(() => {
     const token = localStorage.getItem('turg_token');
@@ -63,6 +67,11 @@ export default function SellerPortal() {
         }
       }
 
+      // Обработваме въведените имейли от текстовото поле в чист масив от стрингове
+      const emailsArray = isPrivate 
+        ? invitedEmailsText.split(',').map(email => email.trim()).filter(email => email !== '')
+        : [];
+
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auctions`, {
         method: 'POST',
         headers: {
@@ -78,7 +87,9 @@ export default function SellerPortal() {
           reservePrice: Number(formData.reservePrice),
           startTime: new Date(formData.startTime).toISOString(),
           endTime: new Date(formData.endTime).toISOString(),
-          specifications: parsedSpecs // ТУК ИЗПРАЩАМЕ ДИНАМИЧНИЯ JSON ОБЕКТ
+          specifications: parsedSpecs, // ТУК ИЗПРАЩАМЕ ДИНАМИЧНИЯ JSON ОБЕКТ
+          isPrivate: isPrivate, // НАДГРАЖДАНЕ: Изпращаме флага за поверителност
+          invitedEmails: emailsArray // НАДГРАЖДАНЕ: Изпращаме масива с поканени адреси
         }),
       });
 
@@ -96,6 +107,8 @@ export default function SellerPortal() {
         startPrice: '', reservePrice: '', startTime: '', endTime: '',
       });
       setSpecifications({});
+      setIsPrivate(false);
+      setInvitedEmailsText('');
 
     } catch (err: any) {
       setError(err.message);
@@ -141,10 +154,10 @@ export default function SellerPortal() {
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white font-medium text-gray-800"
             >
               <option value="PROPERTY">Недвижим имот</option>
-              <option value="VEHICLE">Лек / Товарeн автомобил</option>
+              <option value="VEHICLE">Лек / Товарен автомобил</option>
               <option value="CONSTRUCTION_MACHINERY">Строителна техника (Багери, Фадроми)</option>
               <option value="AGRI_MACHINERY">Селскостопанска техника</option>
-              <option value="BATTERIES_ENERGY">Индустриални батерии / Енергетика</option>
+              <option value="BATTERIES_ENERGY">Indusтриални батерии / Енергетика</option>
               <option value="INDUSTRIAL_EQUIPMENT">Индустриално оборудване / Машини</option>
               <option value="OTHER">Други активи</option>
             </select>
@@ -196,6 +209,37 @@ export default function SellerPortal() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Край на търга</label>
                 <input required type="datetime-local" name="endTime" value={formData.endTime} onChange={handleChange} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
               </div>
+
+              {/* НАДГРАЖДАНЕ: Опции за сигурност и затворена стая */}
+              <div className="pt-4 border-t border-gray-100">
+                <label className="flex items-center space-x-3 cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    checked={isPrivate} 
+                    onChange={(e) => {
+                      setIsPrivate(e.target.checked);
+                      if (!e.target.checked) setInvitedEmailsText('');
+                    }}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer" 
+                  />
+                  <span className="text-sm font-bold text-gray-900">Конфиденциален търг (само с покана)</span>
+                </label>
+              </div>
+
+              {isPrivate && (
+                <div className="pt-2 space-y-1 transition-all duration-200">
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide">Списък с поканени имейли</label>
+                  <input 
+                    required={isPrivate} 
+                    type="text" 
+                    value={invitedEmailsText} 
+                    onChange={(e) => setInvitedEmailsText(e.target.value)} 
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
+                    placeholder="напр. investor1@turg.bg, investor2@grosco.bg" 
+                  />
+                  <p className="text-[11px] text-gray-400 leading-tight">Разделяйте имейлите със запетая. Системата ще генерира индивидуален криптографски ключ за всеки адрес.</p>
+                </div>
+              )}
             </div>
           </div>
 
