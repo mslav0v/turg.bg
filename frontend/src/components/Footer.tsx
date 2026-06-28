@@ -32,8 +32,8 @@ export default function Footer() {
           <div>
             <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider mb-4">Контакти</h3>
             <ul className="space-y-3">
-              <li className="text-sm text-gray-500 font-medium">гр. Варна, ул. Никола Гюзелев 43</li>
-              <li className="text-sm text-gray-500 font-medium">office@grosco.bg</li>
+              <li className="text-sm text-gray-500 font-medium">гр. Варна, бул. Васил Левски 201</li>
+              <li className="text-sm text-gray-500 font-medium">office@google.com</li>
             </ul>
           </div>
 

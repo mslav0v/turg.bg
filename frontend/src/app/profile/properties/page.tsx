@@ -262,7 +262,7 @@ export default function MyPropertiesPage() {
               
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">Текстови адрес (Попълва се автоматично при избор от картата)</label>
-                <input type="text" name="location" value={formData.location} onChange={handleChange} required placeholder="напр. ул. Никола Гюзелев 43..." className="w-full border border-gray-300 rounded-lg p-3 focus:ring-1 focus:ring-gray-900 outline-none transition" />
+                <input type="text" name="location" value={formData.location} onChange={handleChange} required placeholder="напр. бул. Васил Левски 201..." className="w-full border border-gray-300 rounded-lg p-3 focus:ring-1 focus:ring-gray-900 outline-none transition" />
               </div>
 
               <div>
