@@ -235,7 +235,7 @@ export default function SellerPortal() {
                     value={invitedEmailsText} 
                     onChange={(e) => setInvitedEmailsText(e.target.value)} 
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm" 
-                    placeholder="напр. investor1@turg.bg, investor2@grosco.bg" 
+                    placeholder="напр. office@google.com, investor2@google.com" 
                   />
                   <p className="text-[11px] text-gray-400 leading-tight">Разделяйте имейлите със запетая. Системата ще генерира индивидуален криптографски ключ за всеки адрес.</p>
                 </div>
